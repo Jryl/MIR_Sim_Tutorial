@@ -5,8 +5,21 @@
   <include file="$(find mir_navigation)/launch/mir_nav/move_base.xml">
   </include>
 
-  <include file="$(find mir_navigation)/launch/mir_nav/hector_mapping.launch.xml">
-  </include>
+  <!--Two ways for the 2D-mapping-->
+  <!--1.hector_mapping-->
+  <!--include file="$(find mir_navigation)/launch/mir_nav/hector_mapping.launch.xml">
+  </include-->
+
+  <!--2.Gmapping-->
+  <node pkg="gmapping" type="slam_gmapping" name="gmapping_thing" output="screen" >
+    <remap from="scan" to="scan" />
+    <param name="odom_frame" value="odom_comb" />
+    <param name="base_frame" value="base_footprint" />
+  </node>
+
+  <!--3D-mapping with realsense camera-->
+  <!--include file="$(find mir_navigation)/launch/mir_nav/rtabmap.launch">
+  </include-->
 
   <include file="$(find mir_navigation)/launch/mir_launch/sim_start.launch">
   </include>

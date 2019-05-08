@@ -19,10 +19,10 @@ class map_navigation():
 
     rospy.loginfo("|-----------------------------|")
     rospy.loginfo("|PRESSE A KEY:")
-    rospy.loginfo("|'1': Goal_1: (3.0 , 1.5)")
-    rospy.loginfo("|'2': Goal_2: (0.0 , 7.0) ")
-    rospy.loginfo("|'3': Goal_3: (-8.0 , 1.5) ")
-    rospy.loginfo("|'4': Goal_4: (0.0 , 0.0) ")
+    rospy.loginfo("|'1': Goal_1: ( 0.0 , 8.0)")
+    rospy.loginfo("|'2': Goal_2: (-8.0 , 1.5) ")
+    rospy.loginfo("|'3': Goal_3: ( 0.0 , 0.0) ")
+    #rospy.loginfo("|'4': Goal_4: (0.0 , 0.0) ")
     rospy.loginfo("|'0': Quit ")
     rospy.loginfo("|-----------------------------|")
     rospy.loginfo("|WHERE TO GO?")
@@ -37,17 +37,17 @@ class map_navigation():
     ############ run command: rostopic echo /amcl_pose ################
     ##### change the position of the robot and check the x and y ######
     ###################################################################
-    self.xGoal_1 = 3.0
-    self.yGoal_1 = 1.5
+    self.xGoal_1 = 0.0#3.0
+    self.yGoal_1 = 8.0 #1.5
 
-    self.xGoal_2 = 0.0
-    self.yGoal_2 = 7.0
+    self.xGoal_2 = -8.0
+    self.yGoal_2 = 1.5
 
-    self.xGoal_3 = -8.0
-    self.yGoal_3 = 1.5
+    self.xGoal_3 = 0.0
+    self.yGoal_3 = 0.0
 
-    self.xGoal_4 = 0.0
-    self.yGoal_4 = 0.0
+    #self.xGoal_4 = 0.0
+    #self.yGoal_4 = 0.0
     
     self.goalReached = False
 
@@ -68,8 +68,8 @@ class map_navigation():
       self.goalReached = self.moveToGoal(self.xGoal_2, self.yGoal_2)
     elif (choice == 3):
       self.goalReached = self.moveToGoal(self.xGoal_3, self.yGoal_3)
-    elif (choice == 4):
-      self.goalReached = self.moveToGoal(self.xGoal_4, self.yGoal_4)
+    #elif (choice == 4):
+      #self.goalReached = self.moveToGoal(self.xGoal_4, self.yGoal_4)
     elif (choice == 0):
       exit(0)
 
@@ -88,8 +88,8 @@ class map_navigation():
         self.goalReached = self.moveToGoal(self.xGoal_2, self.yGoal_2)
       elif (choice == 3):
         self.goalReached = self.moveToGoal(self.xGoal_3, self.yGoal_3)
-      elif (choice == 4):
-        self.goalReached = self.moveToGoal(self.xGoal_4, self.yGoal_4)
+      #elif (choice == 4):
+        #self.goalReached = self.moveToGoal(self.xGoal_4, self.yGoal_4)
       elif (choice == 0):
         exit(0)
 
@@ -174,7 +174,7 @@ class map_navigation():
         #print(i)
 
         rospy.loginfo("Path_length: %.3f m"%path_length)
-        self.xy = [] # clear the xy list after goal arrived
+        self.xy = [] # clear the xy list after  arriving the goal
 
         return True
 
