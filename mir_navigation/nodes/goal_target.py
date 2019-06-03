@@ -5,7 +5,9 @@ import actionlib
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from math import radians, degrees
 from actionlib_msgs.msg import *
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped, Point, Twist, Pose
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped,  Point, Twist, Pose
+#from geometry_msgs.msg import TwistWithCovarianceStamped, TwistStamped, TwistWithCovariance
+from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
 import sys
 import time
@@ -51,23 +53,33 @@ class map_navigation():
     
     self.goalReached = False
 
+    self.k = 0 
+    
     self.xy = []
+    self.sumax = []
+    self.sumay = []
 
     # initiliaze
     rospy.init_node('map_navigation', anonymous=False)
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1) 
     sub_odom = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped, self.odom_callback) # get the messages of the robot pose in frame
+    #sub_vec = rospy.Subscriber('/odom_comb', TwistWithCovariance, self.vec_callback) 
+    sub_imu = rospy.Subscriber('/imu_data', Imu, self.imu_callback)
 
     rate = rospy.Rate(0.5)
 
     choice = self.choose()
 
     if (choice == 1):
+      self.k = 1
       self.goalReached = self.moveToGoal(self.xGoal_1, self.yGoal_1)
     elif (choice == 2):
+      self.k = 1
       self.goalReached = self.moveToGoal(self.xGoal_2, self.yGoal_2)
     elif (choice == 3):
+      self.k = 1
       self.goalReached = self.moveToGoal(self.xGoal_3, self.yGoal_3)
+
     #elif (choice == 4):
       #self.goalReached = self.moveToGoal(self.xGoal_4, self.yGoal_4)
     elif (choice == 0):
@@ -83,10 +95,13 @@ class map_navigation():
     while choice != 'q':
       choice = self.choose()
       if (choice == 1):
+        self.k = 1
         self.goalReached = self.moveToGoal(self.xGoal_1, self.yGoal_1)
       elif (choice == 2):
+        self.k = 1
         self.goalReached = self.moveToGoal(self.xGoal_2, self.yGoal_2)
       elif (choice == 3):
+        self.k = 1
         self.goalReached = self.moveToGoal(self.xGoal_3, self.yGoal_3)
       #elif (choice == 4):
         #self.goalReached = self.moveToGoal(self.xGoal_4, self.yGoal_4)
@@ -110,11 +125,27 @@ class map_navigation():
     rospy.loginfo("Quit program")
     #rate.sleep()
 
+################ -- get accleration of robot from imu -- ###############
+  def imu_callback(self, imsg):
+
+    ax = imsg.linear_acceleration.x
+    ay = imsg.linear_acceleration.y
+
+    if self.k == 1:
+      #print ("------------------------------------------------")
+      #print (ax)
+      #print (ay)
+
+      if ax > 0:
+        self.sumax.append(ax)     
+      if ay > 0:
+        self.sumay.append(ay)
+
 ############ -- get the current pose of the robot -- #################
   def odom_callback(self, msg):
     #print ("------------------------------------------------")
-    #print ("pose x = " + str(msg.pose.pose.position.x))
-    #print ("pose y = " + str(msg.pose.pose.position.y))
+    #print ("pose vx = " + str(msg.twist.twist.linear.x))
+    #print ("pose vy = " + str(msg.twist.twist..y))
     
     x = msg.pose.pose.position.x
     y = msg.pose.pose.position.y
@@ -122,6 +153,8 @@ class map_navigation():
     self.xy.append(x)
     self.xy.append(y)
     #print(self.xy)
+
+##### Task: How to save the velocity data to the file? So that they be analysed in the matlab. #######
 
 ##############-- move to the destination --##################
   def moveToGoal(self,xGoal,yGoal):
@@ -173,8 +206,29 @@ class map_navigation():
           i += 2
         #print(i)
 
+        ############### -- write the data to the file -- ###############
+        with open("ac_x.txt", 'w') as f:
+          for j in self.sumax:
+            f.write(str(j) + '\n')
+
+        with open("ac_y.txt", 'w') as f:
+          for k in self.sumay:
+            f.write(str(k) + '\n')
+        ################################################################
+
+        sax = sum(self.sumax)
+        say = sum(self.sumay)
+        
         rospy.loginfo("Path_length: %.3f m"%path_length)
+        rospy.loginfo("The Sum of aceleracion linear x: %.3f m/s^2"%sax)
+        rospy.loginfo("The Sum of aceleracion linear y: %.3f m/s^2"%say)
+        
+        
+        ############## initialization again ###################
         self.xy = [] # clear the xy list after  arriving the goal
+        self.sumax = []
+        self.sumay = []
+        self.k = 0
 
         return True
 
